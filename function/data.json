@@ -1,0 +1,123 @@
+{
+    "CX_user": [{
+            "Username": "Calvin_Kwan",
+            "Flight": "CX173",
+            "Floor": 18,
+            "Gender": "M",
+            "Nickname": "Calvin",
+            "Room": "05",
+            "Title": "Mr"
+        },
+        {
+            "Username": "Kitson_Cheung",
+            "Flight": "CX6127",
+            "Floor": 5,
+            "Gender": "M",
+            "Nickname": "Kitson",
+            "Room": "03",
+            "Title": "Mr"
+        },
+        {
+            "Username": "Kwan_Chun_Long",
+            "Flight": "CX111",
+            "Floor": 18,
+            "Gender": "M",
+            "Nickname": "Long",
+            "Room": "05",
+            "Title": "Mr"
+        },
+        {
+            "Username": "Law_Mei_Ching",
+            "Flight": "CX111",
+            "Floor": 7,
+            "Gender": "F",
+            "Nickname": "Polly",
+            "Room": 87,
+            "Title": "Ms"
+        },
+        {
+            "Username": "Ma_Man_Ting",
+            "Flight": "CX173",
+            "Floor": 9,
+            "Gender": "F",
+            "Nickname": "Ting",
+            "Room": 14,
+            "Title": "Ms"
+        },
+        {
+            "Username": "Ng_Sin_Ching",
+            "Flight": "CX111",
+            "Floor": 4,
+            "Gender": "M",
+            "Nickname": "Mike",
+            "Room": "03",
+            "Title": "Mr"
+        }
+    ],
+    "CX_Flight": [{
+            "Flight": "AA8928",
+            "Airline": "American Airlines",
+            "Direction": "Departure",
+            "Status": "18:57",
+            "CheckIn": "B",
+            "Destination": "New York/JFK",
+            "Gate": 63,
+            "Termial": "T1",
+            "TransferDesk": "E2 / W1"
+        },
+        {
+            "Flight": "CX111",
+            "Airline": "Cathay Pacific",
+            "Direction": "Departure",
+            "Status": "19:26",
+            "CheckIn": "B",
+            "Destination": "Sydney",
+            "Gate": 4,
+            "Termial": "T1",
+            "TransferDesk": "E2 / W1"
+        },
+        {
+            "Flight": "CX173",
+            "Airline": "Cathay Pacific",
+            "Direction": "Departure",
+            "Status": "18:51",
+            "CheckIn": "B / C",
+            "Destination": "Adelaide",
+            "Gate": 40,
+            "Termial": "T1",
+            "TransferDesk": "E2 / W1"
+        },
+        {
+            "Flight": "CX6127",
+            "Airline": "Cathay Pacific",
+            "Direction": "Arrival",
+            "Status": "18:34",
+            "Belt": 10,
+            "Hall": "B",
+            "Origin": "Chengdu",
+            "ParkingStand": "N502"
+        },
+        {
+            "Flight": "CX846",
+            "Airline": "Cathay Pacific",
+            "Direction": "Departure",
+            "Status": "18:57",
+            "CheckIn": "B",
+            "Destination": "New York/JFK",
+            "Gate": 63,
+            "Termial": "T1",
+            "TransferDesk": "E2 / W1"
+        },
+        {
+            "Flight": "MH9186",
+            "Airline": "Malaysia Airlines",
+            "Direction": "Departure",
+            "Status": "18:57",
+            "CheckIn": "B",
+            "Destination": "New York/JFK",
+            "Gate": 63,
+            "Termial": "T1",
+            "TransferDesk": "E2 / W1"
+        }
+    ]
+}

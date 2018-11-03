@@ -1,0 +1,309 @@
+AWSTemplateFormatVersion : 2010-09-09
+Description: Create the require resources for the Amazon Sumerian Concierge service.
+
+Parameters:
+  CODENAME:
+    Type: String
+    Description: CODENAME name for current project
+  PRODNAME:
+    Type: String
+    Description: Name of the production
+    
+Resources:
+    CognitoIdentityPool:
+      Type: AWS::Cognito::IdentityPool
+      Properties:
+        IdentityPoolName: !Sub "${AWS::StackName}CognitoIdentityPool"
+        AllowUnauthenticatedIdentities: True
+    CognitoIdentityRole:
+      Type: AWS::IAM::Role
+      Properties:
+        AssumeRolePolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Action: sts:AssumeRoleWithWebIdentity
+            Effect: Allow
+            Principal:
+              Federated: 'cognito-identity.amazonaws.com'
+            Condition:
+              StringEquals:
+                cognito-identity.amazonaws.com:aud: !Ref CognitoIdentityPool
+          # - Action: 's3:PutObject'
+          #   Effect: Allow
+          #   Resource: !Join 
+          #       - ''
+          #       - - 'arn:aws:s3:::'
+          #         - !Ref S3Bucket
+          #         - /*
+          #   Principal:
+          #     Federated: 'cognito-identity.amazonaws.com'
+          # - Action: 'sns:Publish'
+          #   Effect: Allow
+          #   Resource: !Ref AppointmentSnsTopic
+          #   Principal:
+          #     Federated: 'cognito-identity.amazonaws.com'
+        ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonPollyReadOnlyAccess
+        - arn:aws:iam::aws:policy/AmazonLexRunBotsOnly
+        - arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess
+        - arn:aws:iam::aws:policy/AmazonRekognitionReadOnlyAccess
+        - arn:aws:iam::aws:policy/TranslateReadOnly
+        - arn:aws:iam::aws:policy/ComprehendReadOnly
+        - arn:aws:iam::aws:policy/AmazonS3FullAccess
+        - arn:aws:iam::aws:policy/AmazonSNSFullAccess
+      # DependsOn: [AppointmentSnsTopic, S3Bucket]
+    CognitoRoleAttachment:
+      Type: AWS::Cognito::IdentityPoolRoleAttachment
+      Properties:
+        IdentityPoolId: !Ref CognitoIdentityPool
+        Roles:
+          unauthenticated: !GetAtt CognitoIdentityRole.Arn
+    
+    S3Bucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        AccessControl: PublicRead
+        WebsiteConfiguration:
+          IndexDocument: index.html
+          ErrorDocument: error.html
+      DeletionPolicy: Retain
+    BucketPolicy:
+      Type: AWS::S3::BucketPolicy
+      Properties:
+        PolicyDocument:
+          Id: MyPolicy
+          Version: 2012-10-17
+          Statement:
+            - Sid: PublicReadForGetBucketObjects
+              Effect: Allow
+              Principal: '*'
+              Action: 's3:GetObject'
+              Resource: !Join 
+                - ''
+                - - 'arn:aws:s3:::'
+                  - !Ref S3Bucket
+                  - /*
+        Bucket: !Ref S3Bucket
+    
+    AppointmentSnsTopic:
+      Type: AWS::SNS::Topic
+      Properties:
+        DisplayName: !Ref PRODNAME
+        Subscription:
+          - Endpoint: '+85297756885'
+            Protocol: sms
+          - Endpoint: '+85262019000'
+            Protocol: sms
+          - Endpoint: 'me@miklet.pro'
+            Protocol: email
+          - Endpoint: 'aws@siulongk.com'
+            Protocol: email
+        TopicName: BookAppointment
+        
+    UserTable:
+      Type: AWS::DynamoDB::Table
+      Properties: 
+        TableName: !Join
+          - ''
+          - - !Ref CODENAME
+            - '_user'
+        AttributeDefinitions: 
+          - AttributeName: Username
+            AttributeType: S
+        KeySchema: 
+          - AttributeName: Username
+            KeyType: HASH
+        ProvisionedThroughput: 
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+    AppointmentTable:
+      Type: AWS::DynamoDB::Table
+      Properties: 
+        TableName: !Join
+          - ''
+          - - !Ref CODENAME
+            - '_Appointment'
+        AttributeDefinitions: 
+          - AttributeName: Username
+            AttributeType: S
+          - AttributeName: Timestamp
+            AttributeType: N
+        KeySchema: 
+          - AttributeName: Username
+            KeyType: HASH
+          - AttributeName: Timestamp
+            KeyType: RANGE
+        ProvisionedThroughput: 
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+    RekognitionTable:
+      Type: AWS::DynamoDB::Table
+      Properties: 
+        TableName: !Join
+          - ''
+          - - !Ref CODENAME
+            - '_Rekognition'
+        AttributeDefinitions: 
+          - AttributeName: Timestamp
+            AttributeType: N
+        KeySchema: 
+          - AttributeName: Timestamp
+            KeyType: HASH
+        ProvisionedThroughput: 
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 5
+    ComprehendTable:
+      Type: AWS::DynamoDB::Table
+      Properties: 
+        TableName: !Join
+          - ''
+          - - !Ref CODENAME
+            - '_Comprehend'
+        AttributeDefinitions: 
+          - AttributeName: Timestamp
+            AttributeType: N
+        KeySchema: 
+          - AttributeName: Timestamp
+            KeyType: HASH
+        ProvisionedThroughput: 
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+    FlightTable:
+      Type: AWS::DynamoDB::Table
+      Properties: 
+        TableName: !Join
+          - ''
+          - - !Ref CODENAME
+            - '_Flight'
+        AttributeDefinitions: 
+          - AttributeName: Flight
+            AttributeType: S
+        KeySchema: 
+          - AttributeName: Flight
+            KeyType: HASH
+        ProvisionedThroughput: 
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+    WriteCapacityScalableTarget:
+      Type: AWS::ApplicationAutoScaling::ScalableTarget
+      Properties:
+        MaxCapacity: 15
+        MinCapacity: 5
+        ResourceId: !Join
+          - /
+          - - table
+            - !Ref RekognitionTable
+        RoleARN: !GetAtt ScalingRole.Arn
+        ScalableDimension: dynamodb:table:WriteCapacityUnits
+        ServiceNamespace: dynamodb
+    ScalingRole:
+      Type: AWS::IAM::Role
+      Properties:
+        AssumeRolePolicyDocument:
+          Version: 2012-10-17
+          Statement:
+            -
+              Effect: Allow
+              Principal:
+                Service:
+                  - application-autoscaling.amazonaws.com
+              Action:
+                - sts:AssumeRole
+        Path: "/"
+        Policies:
+          -
+            PolicyName: root
+            PolicyDocument:
+              Version: 2012-10-17
+              Statement:
+                -
+                  Effect: Allow
+                  Action:
+                    - dynamodb:DescribeTable
+                    - dynamodb:UpdateTable
+                    - cloudwatch:PutMetricAlarm
+                    - cloudwatch:DescribeAlarms
+                    - cloudwatch:GetMetricStatistics
+                    - cloudwatch:SetAlarmState
+                    - cloudwatch:DeleteAlarms
+                  Resource: '*'
+    WriteScalingPolicy:
+      Type: AWS::ApplicationAutoScaling::ScalingPolicy
+      Properties:
+        PolicyName: WriteAutoScalingPolicy
+        PolicyType: TargetTrackingScaling
+        ScalingTargetId: !Ref WriteCapacityScalableTarget
+        TargetTrackingScalingPolicyConfiguration:
+          TargetValue: 50.0
+          ScaleInCooldown: 60
+          ScaleOutCooldown: 60
+          PredefinedMetricSpecification:
+            PredefinedMetricType: DynamoDBWriteCapacityUtilization
+          
+Outputs:
+  RekognitionCollectionId:
+    Description: Collection ID of Rekognition
+    Value: !Join
+      - ''
+      - - !Ref CODENAME
+        - FaceCollection
+
+  CreatedDynamoDBTable:
+    Description: List of created table
+    Value: !Join
+      - ', '
+      - - !Ref UserTable
+        - !Ref AppointmentTable
+        - !Ref RekognitionTable
+        - !Ref ComprehendTable
+        - !Ref FlightTable
+
+  CognitoIdentityPoolID:
+    Description: The Cognito Identity Pool ID.
+    Value: !Ref CognitoIdentityPool
+    
+  SNSTopicID:
+    Description: The SNS Topic ID
+    Value: !Ref AppointmentSnsTopic
+    
+  S3Bucket:
+    Description: Name of S3 bucket
+    Value: !Ref S3Bucket
+    
+  FrontalfaceSecureURL:
+    Value: !Join 
+      - ''
+      - - 'https://'
+        - !GetAtt 
+          - S3Bucket
+          - DomainName
+        - '/frontalface.js'
+    Description: frontalface.js url
+  JsfeatSecureURL:
+    Value: !Join 
+      - ''
+      - - 'https://'
+        - !GetAtt 
+          - S3Bucket
+          - DomainName
+        - '/jsfeat-min.js'
+    Description: jsfeat-min.js url
+  ExcelLextBotYamlUrl:
+    Value: !Join 
+      - ''
+      - - 'https://'
+        - !GetAtt 
+          - S3Bucket
+          - DomainName
+        - '/excellexbotplus.yaml'
+    Description: ExcelLextBot yaml url
+    
+  AwsSdkUrl:
+    Value: !Join 
+      - ''
+      - - 'https://'
+        - !GetAtt 
+          - S3Bucket
+          - DomainName
+        - '/aws-sdk-2.336.0.min.js'
+    Description: aws-sdk.js url
