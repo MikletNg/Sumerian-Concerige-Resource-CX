@@ -3,13 +3,18 @@
 ```bash
 .
 ├── README.md                   <-- This instructions file
-├── resources                   <-- The resource for sumerian converige required
+├── resources                   <-- The resource for sumerian required
 │   └── excellexbotplus.yaml    <-- SAM template of ExcelLexBot
-└── SumerianResourceStack.yaml  <-- SAM template
+├── SumerianBundle                   
+│   └── bundle.zip              <-- The Sumerian exported bundle
+├── function                    <-- Nodejs file for create face collection and import DynamoDB data
+├── excel                       <-- The Lex bot for Sumerian dialogue component
+├── face                        <-- Containe images for indexing face
+└── SumerianResourceStack.yaml  <-- SAM template if this stack
 ```
 ## Setup process
 1. Install [aws-cli](https://github.com/aws/aws-cli) on your local machine.
-2. Set up AWS credential profile, please make sure you IAM user or role have enough permission.
+2. Set up AWS credential profile, please make sure you IAM user have enough permission.
 ```bash
 $ aws configure --profile default
 ```
@@ -18,8 +23,6 @@ $ aws configure --profile default
 5. Run deploy.sh
 6. Modify those parameters, or just keep press enter and skip it.
 ```bash
-$ git clone https://github.com/MikletNg/Sumerian-Concerige-Resource.git
-$ cd Sumerian-Concerige-Resource
 $ chmod +x ./deploy.sh
 $ ./deploy.sh
 ```

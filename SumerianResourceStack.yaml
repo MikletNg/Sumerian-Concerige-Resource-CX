@@ -66,6 +66,17 @@ Resources:
         WebsiteConfiguration:
           IndexDocument: index.html
           ErrorDocument: error.html
+        CorsConfiguration:
+          CorsRules:
+           -
+            AllowedHeaders:
+              - "*"
+            AllowedMethods:
+              - GET
+              - POST
+              - PUT
+            AllowedOrigins:
+              - "*"
       DeletionPolicy: Retain
     BucketPolicy:
       Type: AWS::S3::BucketPolicy
