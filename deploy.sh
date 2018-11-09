@@ -11,6 +11,7 @@ aws cloudformation create-stack \
 --parameters ParameterKey=CODENAME,ParameterValue=$CODENAME ParameterKey=PRODNAME,ParameterValue=$PRODNAME \
 --capabilities CAPABILITY_IAM  \
 --region us-east-1 \
+--tags Key=Name,Value=CXHackathonSumerian \
 --profile $AWS_PROFILE
 aws cloudformation wait stack-create-complete --stack-name $FULL_STACK_NAME --profile $AWS_PROFILE
 sleep 1
@@ -28,5 +29,6 @@ aws cloudformation deploy \
 --parameter-overrides  SourceBucket=$EXCEL_LEX_BOT_SOURCE_BUCKET ExcelBucketName=$EXCEL_LEX_BOT_EXCEL_BUCKET DynamodbAutoScaling=false \
 --capabilities CAPABILITY_IAM  \
 --region us-east-1 \
+--tags Key=Name,Value=CXHackathonSumerian \
 --profile $AWS_PROFILE
 aws s3 sync ./excel s3://$EXCEL_LEX_BOT_EXCEL_BUCKET --profile $AWS_PROFILE
